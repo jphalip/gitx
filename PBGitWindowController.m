@@ -239,6 +239,11 @@
     [sidebarController.commitViewController refresh: self];
 }
 
+- (IBAction)showMergedButtonClicked:(id)sender {
+	repository.showMergedBranches = ((NSButton *)sender).state;
+	[repository reloadRefs];
+}
+
 - (void) updateStatus
 {
 	NSString *status = contentController.status;

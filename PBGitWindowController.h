@@ -25,6 +25,7 @@
 	IBOutlet NSSplitView *mainSplitView;
 	IBOutlet NSView *sourceSplitView;
 	IBOutlet NSView *contentSplitView;
+	IBOutlet NSButton *hideMergedButton;
 
 	IBOutlet NSTextField *statusField;
 	IBOutlet NSProgressIndicator *progressIndicator;
@@ -58,6 +59,7 @@
 - (IBAction) openInTerminal:(id)sender;
 - (IBAction) cloneTo:(id)sender;
 - (IBAction) refresh:(id)sender;
+- (IBAction) showMergedButtonClicked:(id)sender;
 
 - (void)selectCommitForSha:(NSString *)sha;
 - (NSArray *)menuItemsForPaths:(NSArray *)paths;

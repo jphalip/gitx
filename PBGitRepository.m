@@ -50,6 +50,7 @@ dispatch_queue_t PBGetWorkQueue() {
 @synthesize resetController;
 @synthesize revisionList, branches, currentBranch, refs, hasChanged, config;
 @synthesize currentBranchFilter;
+@synthesize showMergedBranches;
 
 - (NSMenu *) menu {
 	NSMenu *menu = [[NSMenu alloc] init];
@@ -191,6 +192,7 @@ dispatch_queue_t PBGetWorkQueue() {
 	resetController = [[PBGitResetController alloc] initWithRepository:self];
 	stashController = [[PBStashController alloc] initWithRepository:self];
 	submoduleController = [[PBSubmoduleController alloc] initWithRepository:self];
+	showMergedBranches = YES;
     [self reloadRefs];
     [self readCurrentBranch];
 }
@@ -355,6 +357,7 @@ dispatch_queue_t PBGetWorkQueue() {
 	refs = [NSMutableDictionary dictionary];
 	NSMutableArray *oldBranches = [branches mutableCopy];
 
+    // Find all refs
 	NSArray *arguments = [NSArray arrayWithObjects:@"for-each-ref", @"--format=%(refname) %(objecttype) %(objectname) %(*objectname)", @"refs", nil];
 	NSString *output = [self outputForArguments:arguments];
 	NSArray *lines = [output componentsSeparatedByString:@"\n"];
@@ -386,11 +389,34 @@ dispatch_queue_t PBGetWorkQueue() {
 			});
 		});
 	}
+	
+	for (PBGitRevSpecifier *revSpec in oldBranches)
+		if ([revSpec isSimpleRef] && (![revSpec isEqual:[self headRef]]))
+			[self removeBranch:revSpec];
 
-	for (PBGitRevSpecifier *branch in oldBranches)
-		if ([branch isSimpleRef] && (![branch isEqual:[self headRef]]))
-			[self removeBranch:branch];
+	if (!showMergedBranches) {
+		// Find branches that have not been merged yet
+		arguments = [NSArray arrayWithObjects:@"branch", @"--no-merged", nil];
+		output = [self outputForArguments:arguments];
+		NSMutableArray *notMerged = [[NSMutableArray alloc] init];    
+		for (NSString *branchName in [output componentsSeparatedByString:@"\n"]) {		
+			NSString *trimmedbranchName = [branchName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+			[notMerged addObject:trimmedbranchName];
+		}
 
+		// Remove branches that have already been merged
+		NSMutableArray *ignoreBranches = [[NSMutableArray alloc]init ];
+		for (PBGitRevSpecifier *revSpec in branches) {
+			PBGitRef * ref = [revSpec ref];
+			if (![[[[self headRef] ref] branchName] isEqualToString:[ref branchName]] && [ref isBranch] && ![notMerged containsObject:[ref branchName]]) {
+				[ignoreBranches addObject:revSpec];
+			}
+		}
+		for (PBGitRevSpecifier *revSpec in ignoreBranches) {
+			[self removeBranch:revSpec];
+		}
+	}
+    
 	[self willChangeValueForKey:@"refs"];
 	[self didChangeValueForKey:@"refs"];
 	
