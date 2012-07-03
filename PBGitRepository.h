@@ -172,5 +172,5 @@ dispatch_queue_t PBGetWorkQueue();
 @property (strong) PBGitRevSpecifier *currentBranch;
 @property (assign) NSInteger currentBranchFilter;
 @property (strong) NSMutableDictionary* refs;
-@property (assign) BOOL showMergedBranches;
+@property (assign) BOOL hideMergedBranches;
 @end

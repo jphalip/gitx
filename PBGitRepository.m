@@ -50,7 +50,7 @@ dispatch_queue_t PBGetWorkQueue() {
 @synthesize resetController;
 @synthesize revisionList, branches, currentBranch, refs, hasChanged, config;
 @synthesize currentBranchFilter;
-@synthesize showMergedBranches;
+@synthesize hideMergedBranches;
 
 - (NSMenu *) menu {
 	NSMenu *menu = [[NSMenu alloc] init];
@@ -192,7 +192,6 @@ dispatch_queue_t PBGetWorkQueue() {
 	resetController = [[PBGitResetController alloc] initWithRepository:self];
 	stashController = [[PBStashController alloc] initWithRepository:self];
 	submoduleController = [[PBSubmoduleController alloc] initWithRepository:self];
-	showMergedBranches = YES;
     [self reloadRefs];
     [self readCurrentBranch];
 }
@@ -394,7 +393,7 @@ dispatch_queue_t PBGetWorkQueue() {
 		if ([revSpec isSimpleRef] && (![revSpec isEqual:[self headRef]]))
 			[self removeBranch:revSpec];
 
-	if (!showMergedBranches) {
+	if (hideMergedBranches) {
 		// Find branches that have not been merged yet
 		arguments = [NSArray arrayWithObjects:@"branch", @"--no-merged", nil];
 		output = [self outputForArguments:arguments];

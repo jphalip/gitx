@@ -239,8 +239,8 @@
     [sidebarController.commitViewController refresh: self];
 }
 
-- (IBAction)showMergedButtonClicked:(id)sender {
-	repository.showMergedBranches = ((NSButton *)sender).state;
+- (IBAction)hideMergedButtonClicked:(id)sender {
+	repository.hideMergedBranches = ((NSButton *)sender).state;
 	[repository reloadRefs];
 }
 
